@@ -56,7 +56,7 @@ map_data['Date'] = map_data['Position_DateTime'].apply(lambda x: x.date())
 map_data["Weight"] = 1
 
 #Group the data by Date (switch in Position_DateTime if you want to include hours in the heatmap)
-map_data = map_data.groupby("Date").apply(lambda x: x[["Latitude","Longitude","Weight"]].sample(int(len(x)/2)).values.tolist())
+map_data = map_data.groupby("Date").apply(lambda x: x[["Latitude","Longitude","Weight"]].sample(int(len(x))).values.tolist())
 
 #Not really sure what this bit does
 #seems important as these are the only two variables used to create the heatmap!
@@ -66,9 +66,9 @@ date_hour_data = map_data.tolist()
 from folium.plugins import HeatMapWithTime
 from shapely.geometry import Polygon
 #Create a datafram with some lat/lons for some airports
-airports_df = pd.DataFrame({'Latitude': [51.88926, 51.87999, 51.470020, 51.157925, 51.278755, 51.75, 51.588425, 51.50065833,51.32388889,51.34802778,51.655825,51.65250556,51.61166667], 
-              'Longitude': [0.262703, -0.37627178, -0.454295, -0.163917, -0.770607, -1.58361, -0.512994444, 0.774833333,-0.8475,-0.558708333,-0.32585,0.156008333,-0.808333333],
-              'Airport': ['Stansted', 'Luton', 'Heathrow', 'Gatwick','Farnborough','Brize Norton','Denham','White Waltham','Blackbushe','Fairoaks','Elstree','Stapleford','Wycombe']})
+airports_df = pd.DataFrame({'Latitude': [51.88926, 51.87999, 51.470020, 51.157925, 51.278755, 51.75], 
+              'Longitude': [0.262703, -0.37627178, -0.454295, -0.163917, -0.770607, -1.58361],
+              'Airport': ['Stansted', 'Luton', 'Heathrow', 'Gatwick','Farnborough','Brize Norton']})
 
 #Stick the datafram data into a set of series
 lat = airports_df["Latitude"]
@@ -81,6 +81,16 @@ flight_map_time = folium.Map(location =[51.5, -1],zoom_start=10)
 #Add our airport series into the map
 for i in range(len(lat)):
     folium.Marker((lat[i],lon[i]),popup =air[i]).add_to(flight_map_time)
+
+#ATZs are cirlces with radius of 2NM (which is 1852m)
+rad = 1852 * 2
+folium.Circle(location=[51.61166667, -0.808333333], popup='Wycombe ATZ', fill_color='#000', radius=rad, weight=2, color="#000").add_to(flight_map_time)
+folium.Circle(location=[51.65250556, 0.156008333], popup='Stapleford ATZ', fill_color='#000', radius=rad, weight=2, color="#000").add_to(flight_map_time)
+folium.Circle(location=[51.655825, -0.32585], popup='Elstree ATZ', fill_color='#000', radius=rad, weight=2, color="#000").add_to(flight_map_time)
+folium.Circle(location=[51.34802778, -0.558708333], popup='Fairoaks ATZ', fill_color='#000', radius=rad, weight=2, color="#000").add_to(flight_map_time)
+folium.Circle(location=[51.32388889, -0.8475], popup='Blackbushe ATZ', fill_color='#000', radius=rad, weight=2, color="#000").add_to(flight_map_time)
+folium.Circle(location=[51.50065833, 0.774833333], popup='White Waltham ATZ', fill_color='#000', radius=rad, weight=2, color="#000").add_to(flight_map_time)
+folium.Circle(location=[51.588425, -0.512994444], popup='Denham ATZ', fill_color='#000', radius=rad, weight=2, color="#000").add_to(flight_map_time)
 
 
 lat_point_list = [51.76563889,51.835,51.79361111,51.80944444,51.73024444,51.66416667,51.705,51.68888889]
@@ -220,8 +230,14 @@ lon_point_list = [-0.641111111,-0.407222222,-0.3625,-0.242777778,-0.158611111,-0
 addpolygontomap(lat_point_list,lon_point_list,'Luton CTR')
 ### Luton ###
 
+### Heathrow ###
+lat_point_list = [51.60305556,51.60305556,51.59794957925,51.58408346583,51.56935672833,51.5538825548,51.53777916537,51.52116883868,51.50417734216,51.4869325135,51.46956409567,51.45220218407,51.43497677062,51.41801694406,51.40144973378,51.38539955445,51.36998701875,51.35532855722,51.34153520329,51.33694444,51.33694444,51.34153519652,51.35532855076,51.36998703984,51.38539954919,51.40144972936,51.41801694062,51.43497677901,51.45220218285,51.46956409564,51.48693251466,51.50417734447,51.52116884208,51.53777916975,51.55388256002,51.56935673425,51.58408347226,51.59794958599]
+lon_point_list = [-0.6925,-0.214722222, -0.20764, -0.19072535432, -0.17582937181, -0.1630611555, -0.15251299233, -0.1442600754, -0.13836037382, -0.13485421308, -0.13376440339, -0.13509606093, -0.13883677821, -0.14495668357, -0.15340873668, -0.16412893307, -0.17703689319, -0.19203600162, -0.20901422138,-0.214722222,-0.633333333, -0.69820799152, -0.71518621312, -0.73018534838, -0.74309328498, -0.75381348272, -0.76226553694, -0.76838544621, -0.77212616089, -0.77345781861, -0.77236800876, -0.76886184754, -0.76296214517, -0.75470922715, -0.74416106264, -0.73139284476, -0.71649686053, -0.69958207328]
+addpolygontomap(lat_point_list,lon_point_list,'Heathrow CTR')
+### Heathrow ###
+
 #Now add the heatmap data
 HeatMapWithTime(date_hour_data,index =  date_hour_index,radius=8).add_to(flight_map_time)
 
 #save it as a html
-flight_map_time.save('/Users/Gareth.Ahern/Desktop/mapwithtimemapall999.html')
+flight_map_time.save('/Users/Gareth.Ahern/Desktop/mapwithtimemapall9991.html')
